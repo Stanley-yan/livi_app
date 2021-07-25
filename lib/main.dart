@@ -1,8 +1,7 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livi_app/Database/CountryFlag.dart';
 import 'package:livi_app/checkPhoneNo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,28 +12,25 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   SharedPreferences.getInstance().then((prefs) {
+    dotenv.load(fileName: "assets/.env");
     DBHelper.instance.database.then((final database) async {
       if (prefs.getBool("db_Initialized") == null) {
         List countryList = await getCountryFlag();
         for(Map country in countryList){
-          database!.countryFlagDao.insertCountryFlag(new CountryFlag(null,country["name"],country["flag"],country["code"]));
+          database!.countryFlagDao.insertCountryFlag(
+              new CountryFlag(null,country["name"],country["flag"],country["code"]));
         }
         prefs.setBool("db_Initialized", true);
       }
-      else{
-        //test db inited
-        List<CountryFlag> temp = await database!.countryFlagDao.getAllCountryFlag();
-      }
     });
-
   });
   runApp(MyApp());
 }
 
 Future<List> getCountryFlag() async{
-  String temp = await rootBundle.loadString('assets/countryFlagList.json');
-  List tempL = await json.decode(temp);
-  return tempL;
+  String jsonString = await rootBundle.loadString('assets/countryFlagList.json');
+  List countryFlagList = await json.decode(jsonString);
+  return countryFlagList;
 }
 
 class MyApp extends StatelessWidget {

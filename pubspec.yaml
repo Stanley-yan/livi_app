@@ -32,6 +32,8 @@ dependencies:
   shared_preferences: ^2.0.6
   dropdown_search: ^0.6.3
   dio: ^4.0.0
+  flutter_dotenv: ^5.0.0
+  fluttertoast: ^8.0.7
 
 dev_dependencies:
   floor_generator: ^1.1.0
@@ -55,6 +57,7 @@ flutter:
    - assets/image/
    - assets/fonts/
    - assets/countryFlagList.json
+   - assets/.env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

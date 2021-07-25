@@ -12,7 +12,7 @@ class CountryModel {
   factory CountryModel.fromJson(Map<String, dynamic> json) {
     return CountryModel(
       id: json["id"],
-      name: json["name"],
+      name: json["name"] +" "+json["code"],
       flag: json["flag"],
       code: json["code"],
     );
@@ -21,7 +21,7 @@ class CountryModel {
   factory CountryModel.fromCountryFlag(CountryFlag json) {
     return CountryModel(
       id: json.id!,
-      name: json.countryName,
+      name: json.countryName + " " + json.countryCode,
       flag: json.countryFlag,
       code: json.countryCode,
     );

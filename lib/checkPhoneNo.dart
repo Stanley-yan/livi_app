@@ -7,17 +7,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:livi_app/Database/CountryFlag.dart';
 import 'package:livi_app/country_model.dart';
+import 'package:livi_app/twilioValidation.dart';
 import 'package:livi_app/validationHistory.dart';
 
 import 'Database/DBHelper.dart';
 import 'Database/ValidationHistory.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CheckPhoneNo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text('Phone no Validation'),
+      ),
       body: SelectCountry(),
     );
   }
@@ -29,10 +33,11 @@ class SelectCountry extends StatefulWidget{
 }
 
 class _SelectCountry extends State<SelectCountry>{
-
+  static const int _HTTP_OK = 200;
   late String phoneNo;
   late TextEditingController myController;
-  late CountryModel selectedCountry = CountryModel(id:0,name:"Hong Kong",flag:"HK",code:"+852");
+  late CountryModel selectedCountry = CountryModel(id:0,name:"Hong Kong +852",flag:"HK",code:"+852");
+  late List<ValidationHistory> validationHistoryList;
 
   @override
   void initState() {
@@ -40,6 +45,7 @@ class _SelectCountry extends State<SelectCountry>{
     super.initState();
     myController = new TextEditingController();
     phoneNo = "";
+    validationHistoryList = [];
   }
 
   @override
@@ -49,6 +55,7 @@ class _SelectCountry extends State<SelectCountry>{
       child: Column(
         children: [
           Container(
+            margin: EdgeInsets.all(10),
             child: FutureBuilder<List<CountryModel>>(
               future: loadCountryList(),
               builder: (context, snapshot) {
@@ -66,25 +73,38 @@ class _SelectCountry extends State<SelectCountry>{
             ),
           ),
           Container(
+            margin: EdgeInsets.all(10),
             child: TextField(
               keyboardType: TextInputType.number,
               controller: myController,
             ),
           ),
           Container(
+              margin: EdgeInsets.all(10),
               child: TextButton(
-                onPressed: () {
-                  print('clicked Validate');
+                onPressed: () async {
                   phoneNo = myController.value.text;
-                  print(selectedCountry.code+" "+selectedCountry.name);
+                  int twilioResult = await TwilioValidation().phoneNoValidation(phoneNo,selectedCountry.flag);
                   insertValidationContent();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ValidationHistoryPage()),
-                  );
+                  if(twilioResult == _HTTP_OK){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ValidationHistoryPage(historyList:validationHistoryList)),
+                    );
+                  }
+                  else{
+                    Fluttertoast.showToast(
+                        msg: "Phone No format error",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 3,
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 16.0
+                    );
+                  }
                 },
                 child:Text('Validate !'),
-
               )
           )
         ],
@@ -98,17 +118,19 @@ class _SelectCountry extends State<SelectCountry>{
     return CountryModel.fromCountryFlagList(temp);
   }
 
-  Future<void> insertValidationContent() async {
-    final database = await DBHelper.instance.database;
-    database!.validationHistoryDao.insertValidationHistory(
-        new ValidationHistory(
+  void insertValidationContent() {
+    ValidationHistory history = new ValidationHistory(
         null,
         selectedCountry.name,
         selectedCountry.flag,
         selectedCountry.code,
         phoneNo
-      )
     );
+    setState(() {
+      validationHistoryList.add(history);
+    });
+    // final database = await DBHelper.instance.database;
+    // database!.validationHistoryDao.insertValidationHistory(history);
   }
 }
 
