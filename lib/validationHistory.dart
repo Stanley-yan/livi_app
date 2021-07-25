@@ -10,7 +10,7 @@ class ValidationHistoryPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Validation History'),
       ),
-      body:Text('Body'),
+      body:DisplayValidationHistory()
     );
   }
 }
@@ -34,9 +34,21 @@ class _DisplayValidationHistory extends State<DisplayValidationHistory> {
     return Container(
       child: FutureBuilder<List<ValidationHistory>>(
         future: loadValidationHistory(),
-        builder: (contect,snapshot) {
-          return ListView(
-            scrollDirection: Axis.vertical,
+        builder: (context,snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            //print('project snapshot data is: ${projectSnap.data}');
+            return Container();
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(10.0),
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, i){
+              return ListTile(
+                title: Text(
+                  snapshot.data![i].phoneNo,
+                ),
+              );
+            },
           );
         }
       ),

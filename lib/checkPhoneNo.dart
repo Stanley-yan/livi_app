@@ -75,7 +75,7 @@ class _SelectCountry extends State<SelectCountry>{
               child: TextButton(
                 onPressed: () {
                   print('clicked Validate');
-                  print(myController.value.text);
+                  phoneNo = myController.value.text;
                   print(selectedCountry.code+" "+selectedCountry.name);
                   insertValidationContent();
                   Navigator.push(
@@ -101,7 +101,7 @@ class _SelectCountry extends State<SelectCountry>{
   Future<void> insertValidationContent() async {
     final database = await DBHelper.instance.database;
     database!.validationHistoryDao.insertValidationHistory(
-      new ValidationHistory(
+        new ValidationHistory(
         null,
         selectedCountry.name,
         selectedCountry.flag,
