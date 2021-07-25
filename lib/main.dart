@@ -43,8 +43,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false ,
       theme: ThemeData(
         // Define the default brightness and colors.
-        brightness: Brightness.dark,
-        primaryColor: Colors.lightBlue[800],
+        brightness: Brightness.light,
+        primaryColor: Colors.lightBlue[900],
         accentColor: Colors.cyan[600],
 
         // Define the default font family.
@@ -54,8 +54,8 @@ class MyApp extends StatelessWidget {
         // text styling for headlines, titles, bodies of text, and more.
         textTheme: TextTheme(
           headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-          headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-          bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
+          headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic,color:Colors.lightBlue[900]),
+          bodyText2: TextStyle(fontSize: 25.0, fontFamily: 'Hind',color:Colors.lightBlue[900]),
         ),
       ),
       home: MyHomePage(
@@ -86,7 +86,7 @@ class MyHomePage extends StatelessWidget {
               margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 60.0),
               child: SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 80,
                 child:TextButton(
                   onPressed: () {
                     print('Clicked Start!');
@@ -99,11 +99,16 @@ class MyHomePage extends StatelessWidget {
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: Colors.red)
+                              side: BorderSide(
+                                  color: Theme.of(context).primaryColor,
+                              ),
                           )
                       )
                   ),
-                  child: Text('Start !'),
+                  child: Text(
+                    'Start !',
+                    style: Theme.of(context).textTheme.headline6,
+                  ),
                 ),
               )
             )

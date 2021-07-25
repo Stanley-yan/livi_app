@@ -52,10 +52,11 @@ class _SelectCountry extends State<SelectCountry>{
   Widget build(BuildContext context) {
     // TODO: implement build
     return Container(
+      padding: EdgeInsets.all(20),
       child: Column(
         children: [
           Container(
-            margin: EdgeInsets.all(10),
+            margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
             child: FutureBuilder<List<CountryModel>>(
               future: loadCountryList(),
               builder: (context, snapshot) {
@@ -73,39 +74,53 @@ class _SelectCountry extends State<SelectCountry>{
             ),
           ),
           Container(
-            margin: EdgeInsets.all(10),
+            margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
             child: TextField(
               keyboardType: TextInputType.number,
               controller: myController,
             ),
           ),
           Container(
-              margin: EdgeInsets.all(10),
-              child: TextButton(
-                onPressed: () async {
-                  phoneNo = myController.value.text;
-                  int twilioResult = await TwilioValidation().phoneNoValidation(phoneNo,selectedCountry.flag);
-                  insertValidationContent();
-                  if(twilioResult == _HTTP_OK){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ValidationHistoryPage(historyList:validationHistoryList)),
-                    );
-                  }
-                  else{
-                    Fluttertoast.showToast(
-                        msg: "Phone No format error",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                        timeInSecForIosWeb: 3,
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                        fontSize: 16.0
-                    );
-                  }
-                },
-                child:Text('Validate !'),
-              )
+            margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
+            child: SizedBox(
+                width: double.infinity,
+                height: 80,
+                child: TextButton(
+                    onPressed: () async {
+                      phoneNo = myController.value.text;
+                      if(phoneNo.isEmpty){
+                        showToastBox("Please enter Phone No.");
+                        return;
+                      }
+                      int twilioResult = await TwilioValidation().phoneNoValidation(phoneNo,selectedCountry.flag);
+                      insertValidationContent();
+                      if(twilioResult == _HTTP_OK){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ValidationHistoryPage(historyList:validationHistoryList)),
+                        );
+                      }
+                      else{
+                        showToastBox("Phone No. format error");
+                      }
+                    },
+                    style: ButtonStyle(
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            )
+                        )
+                    ),
+                    child:Text(
+                      'Validate !',
+                      style: Theme.of(context).textTheme.bodyText2,
+                    )
+                ),
+              ),
+
           )
         ],
       ),
@@ -131,6 +146,18 @@ class _SelectCountry extends State<SelectCountry>{
     });
     // final database = await DBHelper.instance.database;
     // database!.validationHistoryDao.insertValidationHistory(history);
+  }
+
+  void showToastBox(String message){
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
   }
 }
 
