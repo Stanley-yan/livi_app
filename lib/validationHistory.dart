@@ -44,8 +44,13 @@ class _DisplayValidationHistory extends State<DisplayValidationHistory> {
             itemCount: snapshot.data!.length,
             itemBuilder: (context, i){
               return ListTile(
-                title: Text(
-                  snapshot.data![i].phoneNo,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children:<Widget>[
+                    Text(snapshot.data![i].phoneNo),
+                    Text(snapshot.data![i].countryName),
+                    Text(snapshot.data![i].countryFlag),
+                  ],
                 ),
               );
             },
