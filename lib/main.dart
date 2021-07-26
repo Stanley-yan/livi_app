@@ -1,42 +1,17 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:livi_app/Database/CountryFlag.dart';
 import 'package:livi_app/checkPhoneNo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'Database/DBHelper.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  SharedPreferences.getInstance().then((prefs) {
-    dotenv.load(fileName: "assets/.env");
-    DBHelper.instance.database.then((final database) async {
-      if (prefs.getBool("db_Initialized") == null) {
-        List countryList = await getCountryFlag();
-        for(Map country in countryList){
-          database!.countryFlagDao.insertCountryFlag(
-              new CountryFlag(null,country["name"],country["flag"],country["code"]));
-        }
-        prefs.setBool("db_Initialized", true);
-      }
-    });
-  });
   runApp(MyApp());
-}
-
-Future<List> getCountryFlag() async{
-  String jsonString = await rootBundle.loadString('assets/countryFlagList.json');
-  List countryFlagList = await json.decode(jsonString);
-  return countryFlagList;
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final appName = 'Custom Themes';
+    final appName = 'Livi Code Test';
 
     return MaterialApp(
       title: appName,
@@ -89,7 +64,6 @@ class MyHomePage extends StatelessWidget {
                 height: 80,
                 child:TextButton(
                   onPressed: () {
-                    print('Clicked Start!');
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => CheckPhoneNo()),

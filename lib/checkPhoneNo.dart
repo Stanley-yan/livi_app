@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -9,16 +10,20 @@ import 'package:livi_app/Database/CountryFlag.dart';
 import 'package:livi_app/country_model.dart';
 import 'package:livi_app/twilioValidation.dart';
 import 'package:livi_app/validationHistory.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Database/DBHelper.dart';
 import 'Database/ValidationHistory.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import 'Loading.dart';
 
 class CheckPhoneNo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // set it to false
       appBar: AppBar(
         title: Text('Phone no Validation'),
       ),
@@ -38,6 +43,8 @@ class _SelectCountry extends State<SelectCountry>{
   late TextEditingController myController;
   late CountryModel selectedCountry = CountryModel(id:0,name:"Hong Kong +852",flag:"HK",code:"+852");
   late List<ValidationHistory> validationHistoryList;
+  late List<CountryModel> countryModelList;
+  late bool isLoading;
 
   @override
   void initState() {
@@ -46,22 +53,45 @@ class _SelectCountry extends State<SelectCountry>{
     myController = new TextEditingController();
     phoneNo = "";
     validationHistoryList = [];
+    countryModelList = [];
+    isLoading = true;
+
+    SharedPreferences.getInstance().then((prefs) async {
+      if (prefs.getBool("db_Initialized") == null) {
+        DBHelper.instance.database.then((final database) async {
+          List countryList = await getCountryFlag();
+          for(Map country in countryList){
+            database!.countryFlagDao.insertCountryFlag(
+                new CountryFlag(null,country["name"],country["flag"],country["code"]));
+          }
+          prefs.setBool("db_Initialized", true);
+          setState(() {
+            isLoading = false;
+          });
+        });
+      }
+      else{
+        countryModelList = await loadCountryList();
+        setState(() => isLoading = false);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Container(
+    return isLoading? Loading() : Container(
       padding: EdgeInsets.all(20),
       child: Column(
         children: [
           Container(
             margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
-            child: FutureBuilder<List<CountryModel>>(
-              future: loadCountryList(),
-              builder: (context, snapshot) {
-                return DropdownSearch<CountryModel>(
-                  items: snapshot.data,
+            // child: FutureBuilder<List<CountryModel>>(
+            //   future: loadCountryList(),
+            //   builder: (context, snapshot) {
+            //     return
+                  child:DropdownSearch<CountryModel>(
+                  items: countryModelList,
                   maxHeight: 300,
                   label: "Select Country",
                   onChanged:  (data) => {setState((){
@@ -69,9 +99,8 @@ class _SelectCountry extends State<SelectCountry>{
                   })},
                   selectedItem: selectedCountry,
                   showSearchBox: true,
-                );
-              },
-            ),
+                ),
+            //),
           ),
           Container(
             margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
@@ -159,6 +188,13 @@ class _SelectCountry extends State<SelectCountry>{
         fontSize: 16.0
     );
   }
+
+  Future<List> getCountryFlag() async{
+    String jsonString = await rootBundle.loadString('assets/countryFlagList.json');
+    List countryFlagList = await json.decode(jsonString);
+    return countryFlagList;
+  }
+
 }
 
 

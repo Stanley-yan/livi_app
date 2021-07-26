@@ -6,6 +6,7 @@ class TwilioValidation{
   static const int _HTTP_OK = 200;
 
   Future<int> phoneNoValidation(String phoneNo, String flag) async {
+    dotenv.load(fileName: "assets/.env");
     _dio.options.baseUrl = dotenv.env['API_URL']!;
     _dio.options.headers =  {'Authorization': dotenv.env['API_AUTH_HEADER']};
     _dio.options.connectTimeout = 3000;
